@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html class="h-100">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Huntress - Log4Shell Tester</title>
+
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    </head>
+
+    <body class="d-flex flex-column h-100">
+        <main class="flex-shrink-0">
+            <div class="container">
+                <h1>Huntress Log4Shell Vulnerability Results</h1>
+
+                <p>
+                    Any time a server reaches out to our LDAP server with your unique
+                    identifier, it will be logged here. You can use the payload you
+                    received on the home page to test various services in your network
+                    and check back here for any results. Your payload is:
+
+                    <div style="text-align: center">
+                        <pre>PAYLOAD</pre>
+                    </div>
+                </p>
+
+                <div class="alert alert-warning" role="alert">
+                    The entries below are only cached for up to 30 minutes. If you
+                    need this data, you should copy it to a safe place.
+                </div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">IP Address</th>
+                            <th scope="col">Date/Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        BODY
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <footer class="footer mt-auto py-3 bg-light">
+            <div class="container">
+                <span class="text-muted">Created by <a href="https://twitter.com/calebjstewart">@calebjstewart</a>, <a href="https://www.linkedin.com/in/jslagle/">Jason Slagle</a> and <a href="https://twitter.com/_JohnHammond">@_JohnHammond</a>.</span>
+            </div>
+        </footer>
+    </body>
+</html>
