@@ -17,10 +17,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <!-- see https://github.com/ozimov/embedded-redis-->
-            <groupId>com.github.kstyrc</groupId>
+             <groupId>com.github.codemonstur</groupId>
             <artifactId>embedded-redis</artifactId>
-            <version>0.6</version>
+            <version>0.10.0</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

@@ -46,10 +46,10 @@ public class App implements Callable<Integer> {
     @Option(names = {"-c", "--config"}, description = "Path to YAML configuration file (overrides commandline options).")
     private File config_file;
 
-    @Option(names = {"--useEmbeddedRedis",}, description = "Use redis server embedded in Java jar?", defaultValue = "false")
+    @Option(names = {"--useEmbeddedRedis"}, description = "Use redis server embedded in Java jar?", defaultValue = "false")
     private boolean useEmbeddedRedis;
 
-    @Option(names = "--embeddedRedisPort", defaultValue = "6379")
+    @Option(names = {"--embeddedRedisPort"}, defaultValue = "6379")
     private int embeddedRedisPort;
 
     public static void main(String[] args) {
@@ -142,6 +142,7 @@ public class App implements Callable<Integer> {
             } catch (java.lang.RuntimeException re) {
                 System.out.println("Possible problem due to https://github.com/kstyrc/embedded-redis/issues/51");
                 System.out.println("If you are running windows, please allocate 10GB of pagefile and reboot.");
+                System.out.println("[WIN-R -> sysdm.cpl] to open dialog.");
                 throw re;
             }
         }
