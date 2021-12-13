@@ -1,3 +1,9 @@
+# crust
+
+.vscode/
+.settings/
+.idea/
+
 # Emacs/vim
 
 *~
