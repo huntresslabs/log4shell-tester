@@ -1,0 +1,7 @@
+# These represent the default values
+http_host: 127.0.0.1
+http_port: 8000
+ldap_host: 0.0.0.0
+ldap_port: 1389
+redis_url: redis://localhost:6379
+hostname: 127.0.0.1

@@ -1,30 +1,24 @@
 package com.huntresslabs.log4shell;
 
 import java.util.UUID;
-import java.lang.StringBuilder;
-import java.io.InputStream;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
-import io.undertow.util.Headers;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-
-import io.lettuce.core.*;
-import io.lettuce.core.api.*;
-import io.lettuce.core.api.sync.*;
-
-import com.huntresslabs.log4shell.App;
+import io.undertow.util.Headers;
 
 public class IndexHandler implements HttpHandler {
 
     private RedisClient redis;
     private String url;
+    private String indexHTML;
 
     public IndexHandler(RedisClient redis, String url) {
         this.redis = redis;
         this.url = url;
+        this.indexHTML = App.readResource("index.html");
     }
 
     @Override
@@ -40,7 +34,7 @@ public class IndexHandler implements HttpHandler {
         // Store the GUID
         commands.lpush(uuid, "exists");
 
-        String response = App.indexHTML.replace("GUID", uuid);
+        String response = indexHTML.replace("GUID", uuid);
         response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
 
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");

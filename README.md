@@ -38,7 +38,7 @@ If any of your clients do reach out, you can view the timestamps and external IP
 addresses at your specific "view" URL (presented through a button on the index
 page).
 
-All entries in the cache of a 30 minute time-out. This means that 30 minutes after
+All entries in the cache have a 30 minute time-out. This means that 30 minutes after
 your last request, all results will be gone from the Redis cache forever.
 
 ## Building
@@ -61,20 +61,83 @@ UUIDs for users as well as track known "hits" for the LDAP endpoint.
 
 ## Running
 
-The JAR file has no defined Main Class, however you can run the `App` class directly
-with the following arguments:
+The JAR file can be executed directly. Configuration can be passed via command
+line arguments or a YAML configuration file. The hostname argument is used to
+construct the testing payloads given to the user and must be an IP address or
+resolvable domain name which can be reached from the victim server or application
+which you are testing.
 
-```sh
-java -cp target/log4shell-jar-with-dependencies.jar \
-         com.huntress.log4shell.App \
-         <public_hostname> \
-         <http_port> \
-         <ldap_port> \
-         [<redis_url>]
+``` sh
+# Help/usage details
+$ java -jar target/log4shell-jar-with-dependencies.jar --help
+Usage: log4shell-tester [-hV] [-c=<config_file>] [--hostname=<hostname>]
+                        [--http-host=<http_host>] [--http-port=<http_port>]
+                        [--ldap-host=<ldap_host>] [--ldap-port=<ldap_port>]
+                        [--redis-url=<redis_url>]
+Execute the Huntress Log4Shell-Tester HTTP and LDAP servers.
+  -c, --config=<config_file>
+                  Path to YAML configuration file (overrides commandline
+                    options).
+  -h, --help      Show this help message and exit.
+      --hostname=<hostname>
+                  The publicly routable IP address or resolvable hostname of
+                    the server (default: 127.0.0.1).
+      --http-host=<http_host>
+                  IP address on which to listen for HTTP connections (default:
+                    127.0.0.1)
+      --http-port=<http_port>
+                  Port to listen for HTTP connections (default: 8000)
+      --ldap-host=<ldap_host>
+                  IP address on which to listen for LDAP connections (default:
+                    0.0.0.0)
+      --ldap-port=<ldap_port>
+                  Port to listen for LDAP connections (default: 1389)
+      --redis-url=<redis_url>
+                  Connection string for the Redis cache server (default: redis:
+                    //localhost:6379)
+  -V, --version   Print version information and exit.
+  
+# Example invocation listening on 127.0.0.1 for HTTP (default).
+#   This is recommended if running publicly so you can setup
+#   a proxy like nginx to handle SSL publicly.
+$ java -jar target/log4shell-jar-with-dependencies.jar \
+   --hostname my-log4shell-tester.something.com \
+   --http-host 127.0.0.1 \
+   --http-port 8000 \
+   --ldap-host 0.0.0.0 \
+   --ldap-port 1389 \
+   --redis-url "redis://my-redis-url.something.com:6379"
+   
+# Example invocation allowing HTTP inbound externally
+$ java -jar target/log4shell-jar-with-dependencies.jar \
+   --hostname my-log4shell-tester.something.com \
+   --http-host 0.0.0.0 \
+   --http-port 8000 \
+   --ldap-host 0.0.0.0 \
+   --ldap-port 1389 \
+   --redis-url "redis://:password@my-redis-url.something.com:6379"
+   
+# Example invocation with a configuration file (recommended to better store
+#   redis secrets).
+$ java -jar target/log4shell-jar-with-dependencies.jar \
+   --config /path/to/log4shell/config.yaml
 ```
 
-The application requires the public hostname because it generates a payload
-to test the Log4Shell vulnerability which must include the publicly resolvable
-hostname or IP address of the testing instance itself. The HTTP and LDAP ports
-are fairly self-explanatory. The Redis URL is optional, and defaults to
-`redis://localhost:6379`.
+## Configuration File
+
+The configuration file is a YAML document that provides the same options as the
+command line arguments, but in `snake_case` instead of `kabab-case`. An example
+configuration file with the default values looks like:
+
+> :warning: Any configurations specified in the configuration file will override command-line arguments.
+   
+``` yaml
+# These represent the default values
+http_host: 127.0.0.1
+http_port: 8000
+ldap_host: 0.0.0.0
+ldap_port: 1389
+redis_url: redis://localhost:6379
+hostname: 127.0.0.1
+```
+

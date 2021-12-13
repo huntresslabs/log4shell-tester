@@ -1,33 +1,29 @@
 package com.huntresslabs.log4shell;
 
-import java.util.Deque;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
-import io.undertow.util.Headers;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.sync.RedisCommands;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-
-import io.lettuce.core.*;
-import io.lettuce.core.api.*;
-import io.lettuce.core.api.sync.*;
-
-import com.huntresslabs.log4shell.HTTPServer;
-import com.huntresslabs.log4shell.App;
+import io.undertow.util.Headers;
 
 public class ViewHandler implements HttpHandler {
 
     private RedisClient redis;
     private String url;
+    private String viewHTML;
 
     public ViewHandler(RedisClient redis, String url) {
         this.redis = redis;
         this.url = url;
+        this.viewHTML = App.readResource("view.html");
     }
 
     @Override
     public void handleRequest(HttpServerExchange exchange) {
-
         StatefulRedisConnection<String, String> connection = redis.connect();
         RedisCommands<String, String> commands = connection.sync();
 
@@ -57,7 +53,8 @@ public class ViewHandler implements HttpHandler {
             body.append("<tr><td>" + values[0] + "</td><td>" + values[1] + "</td></tr>");
         }
 
-        String response = App.viewHTML.replace("BODY", body.toString());
+        String response = viewHTML.replace("BODY", body.toString());
+        response = response.replace("UUID", uuid);
         response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
 
         // Send the response w/ HTML type
