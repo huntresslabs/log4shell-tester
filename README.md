@@ -141,7 +141,7 @@ redis_url: redis://localhost:6379
 hostname: 127.0.0.1
 ```
 
- ## Quick and easy local testing, no Redis database instance or docker needed
+## Quick and easy local testing, no Redis database instance or docker needed
 
     mvn clean package
     java -jar ./target/log4shell-jar-with-dependencies.jar --useEmbeddedRedis
