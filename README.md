@@ -140,4 +140,12 @@ ldap_port: 1389
 redis_url: redis://localhost:6379
 hostname: 127.0.0.1
 ```
+## Heroku Deploys
 
+When deploying to Heroku, ensure that you have added a Redis service to your Add-ons under resources:
+
+[https://dashboard.heroku.com/apps/YOUR_APP/resources](https://dashboard.heroku.com/apps/YOUR_APP/resources)
+
+You will also need to set APP_DOMAIN_NAME in your Heroku configuration variables by clicking "Reveal Config Vars" in the link below. If you're using Heroku's default domain, it will be something like YOURAPP.herokuapp.com
+
+[https://dashboard.heroku.com/apps/YOUR_APP/settings](https://dashboard.heroku.com/apps/log4shell/settings)
