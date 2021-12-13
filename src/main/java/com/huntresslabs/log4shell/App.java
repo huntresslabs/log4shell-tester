@@ -135,14 +135,13 @@ public class App implements Callable<Integer> {
 
         if (useEmbeddedRedis) {
             System.out.printf("Starting an embedded Redis server on %d%n", embeddedRedisPort);
-            redisServer = new RedisServer();
 
             redisServer = RedisServer.newRedisServer()
                     .port(embeddedRedisPort)
                     .setting("bind 127.0.0.1") // good for local development on Windows to prevent security popups
-                    .slaveOf("locahost", embeddedRedisPort)
-                    .setting("daemonize no")
-                    .setting("appendonly no")
+//                    .slaveOf("locahost", embeddedRedisPort)
+//                    .setting("daemonize no")
+//                    .setting("appendonly no")
                     .setting("maxmemory 1G") //fixes try catch???
                     .build();
 
