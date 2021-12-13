@@ -49,6 +49,9 @@ public class App implements Callable<Integer> {
     @Option(names = {"--useEmbeddedRedis",}, description = "Use redis server embedded in Java jar?", defaultValue = "false")
     private boolean useEmbeddedRedis;
 
+    @Option(names = "--embeddedRedisPort", defaultValue = "6379")
+    private int embeddedRedisPort;
+
     public static void main(String[] args) {
         new CommandLine(new App()).execute(args);
     }
@@ -128,18 +131,28 @@ public class App implements Callable<Integer> {
         // Construct the LDAP url
         String ldap_url = "ldap://" + hostname + ":" + ldap_port;
 
+        RedisServer redisserver = null; //from https://github.com/ozimov/embedded-redis
+
+        if (useEmbeddedRedis) {
+            System.out.printf("Starting an embedded Redis server on %d%n", embeddedRedisPort);
+            redisserver = new RedisServer(embeddedRedisPort);
+
+            try {
+                redisserver.start();
+            } catch (java.lang.RuntimeException re) {
+                System.out.println("Possible problem due to https://github.com/kstyrc/embedded-redis/issues/51");
+                System.out.println("If you are running windows, please allocate 10GB of pagefile and reboot.");
+                throw re;
+            }
+        }
+
+
         // Create the redis connection manager
         logger.info("connecting to redis database");
         RedisClient redis = RedisClient.create(redis_url);
-        RedisServer redisserver = null;//from https://github.com/ozimov/embedded-redis
 
-        if(useEmbeddedRedis){
-            System.out.println("Starting a LOCAL EMBELDDED LEDDIT server :)");
-            redisserver = new RedisServer(6379);
-            redisserver.start();
-        }
-
-            redis.connect();
+        //test connection early
+        redis.connect();
 
         // Run the HTTP server
         logger.infof("starting http server listening on %s:%d", http_host, http_port);
