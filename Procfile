@@ -1,1 +1,1 @@
-web: java -jar target/log4shell-jar-with-dependencies.jar --hostname $APP_DOMAIN_NAME --http-host 0.0.0.0 --http-port 8000 --ldap-host 0.0.0.0 --ldap-port 1389 --redis-url "$REDIS_URL"
+web: java -jar target/log4shell-jar-with-dependencies.jar --hostname $APP_DOMAIN_NAME --http-host 0.0.0.0 --http-port ${PORT:-8000} --ldap-host 0.0.0.0 --ldap-port 1389 --redis-url "$REDIS_URL"
