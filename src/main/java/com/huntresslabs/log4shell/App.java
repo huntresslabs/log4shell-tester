@@ -139,11 +139,12 @@ public class App implements Callable<Integer> {
 
             try {
                 redisserver.start();
-            } catch (java.lang.RuntimeException re) {
+            } catch (Exception e) {
                 System.out.println("Possible problem due to https://github.com/kstyrc/embedded-redis/issues/51");
                 System.out.println("If you are running windows, please allocate 10GB of pagefile and reboot.");
                 System.out.println("[WIN-R -> sysdm.cpl] to open dialog.");
-                throw re;
+                System.out.println("Alternatively you do not have enough disk space free -- Try clearing about 50GB");
+                throw e;
             }
         }
 
