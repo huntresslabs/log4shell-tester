@@ -131,29 +131,18 @@ public class App implements Callable<Integer> {
         // Construct the LDAP url
         String ldap_url = "ldap://" + hostname + ":" + ldap_port;
 
-        RedisServer redisServer = null; //from https://github.com/ozimov/embedded-redis
+        RedisServer embeddedRedisServer = null;
 
         if (useEmbeddedRedis) {
-            System.out.printf("Starting an embedded Redis server on %d%n", embeddedRedisPort);
+            logger.infof("Starting an embedded Redis server on %d%n", embeddedRedisPort);
 
-            redisServer = RedisServer.newRedisServer()
+            embeddedRedisServer = RedisServer.newRedisServer()
                     .port(embeddedRedisPort)
                     .setting("bind 127.0.0.1") // good for local development on Windows to prevent security popups
-//                    .slaveOf("locahost", embeddedRedisPort)
-//                    .setting("daemonize no")
-//                    .setting("appendonly no")
-                    .setting("maxmemory 1G") //fixes try catch???
+                    .setting("maxmemory 1G") // Required if using Windows, redis has some memory bug
                     .build();
 
-            try {
-                redisServer.start();
-            } catch (Exception e) {
-                System.out.println("Possible problem due to https://github.com/kstyrc/embedded-redis/issues/51");
-                System.out.println("If you are running windows, please allocate 10GB of pagefile and reboot.");
-                System.out.println("[WIN-R -> sysdm.cpl] to open dialog.");
-                System.out.println("Alternatively you do not have enough disk space free -- Try clearing about 50GB");
-                throw e;
-            }
+            embeddedRedisServer.start();
         }
 
 
@@ -172,7 +161,7 @@ public class App implements Callable<Integer> {
         logger.infof("starting ldap server listening on %s:%d", ldap_host, ldap_port);
         LDAPServer.run(ldap_host, ldap_port, redis);
 
-        logger.infof("Ready! connect to %s:%d", http_host, http_port);
+        logger.infof("Ready! Connect to http://%s:%d/", http_host, http_port);
 
         return 0;
     }
