@@ -54,44 +54,47 @@ public class LDAPServer
                 public void processSearchResult ( InMemoryInterceptedSearchResult result ) {
                     String key = result.getRequest().getBaseDN();
                     StatefulRedisConnection<String, String> connection = redis.connect();
-                    RedisCommands<String, String> commands = connection.sync();
-                    LDAPListenerClientConnection conn;
 
-                    // Send an error response regardless
-                    result.setResult(new LDAPResult(0, ResultCode.OPERATIONS_ERROR));
-
-                    // This is a gross reflection block to get the client address
                     try {
-                        Field field = result.getClass().getSuperclass().getDeclaredField("clientConnection");
-                        field.setAccessible(true);
+                        RedisCommands<String, String> commands = connection.sync();
+                        LDAPListenerClientConnection conn;
 
-                        conn = (LDAPListenerClientConnection)field.get(result);
-                    } catch ( Exception e2 ) {
+                        // Send an error response regardless
+                        result.setResult(new LDAPResult(0, ResultCode.OPERATIONS_ERROR));
+
+                        // This is a gross reflection block to get the client address
+                        try {
+                            Field field = result.getClass().getSuperclass().getDeclaredField("clientConnection");
+                            field.setAccessible(true);
+
+                            conn = (LDAPListenerClientConnection)field.get(result);
+                        } catch ( Exception e2 ) {
+                            e2.printStackTrace();
+                            return;
+                        }
+
+                        // Build the resulting value, storing the UTC timestamp and the requestor address
+                        String when = Instant.now().toString();
+                        String addr = conn.getSocket().getInetAddress().toString().replaceAll("^/", "");
+                        String value = addr + "/" + when;
+                        Boolean valid = (commands.exists(key) != 0);
+
+                        // Log any requests
+                        log_attempt(addr, key, valid);
+
+                        // Ignore requests with invalid UUIDs
+                        if ( ! valid ) {
+                            return;
+                        }
+
+                        // Store this result
+                        commands.lpush(key, value);
+
+                        // Keys expire after 30 minutes from creation...
+                        // commands.expire(key, 1800);
+                    } finally {
                         connection.close();
-                        e2.printStackTrace();
-                        return;
                     }
-
-                    // Build the resulting value, storing the UTC timestamp and the requestor address
-                    String when = Instant.now().toString();
-                    String addr = conn.getSocket().getInetAddress().toString().replaceAll("^/", "");
-                    String value = addr + "/" + when;
-                    Boolean valid = (commands.exists(key) != 0);
-
-                    // Log any requests
-                    log_attempt(addr, key, valid);
-
-                    // Ignore requests with invalid UUIDs
-                    if ( ! valid ) {
-                        return;
-                    }
-
-                    // Store this result
-                    commands.lpush(key, value);
-                    commands.expire(key, 1800);
-
-                    // Close the connection
-                    connection.close();
                 }
             });
             InMemoryDirectoryServer ds = new InMemoryDirectoryServer(config);

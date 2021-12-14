@@ -26,20 +26,24 @@ public class IndexHandler implements HttpHandler {
 
         // Connect to redis cache
         StatefulRedisConnection<String, String> conn = redis.connect();
-        RedisCommands<String, String> commands = conn.sync();
 
-        // Generate a random UUID
-        String uuid = UUID.randomUUID().toString();
+        try {
+            RedisCommands<String, String> commands = conn.sync();
 
-        // Store the GUID
-        commands.lpush(uuid, "exists");
+            // Generate a random UUID
+            String uuid = UUID.randomUUID().toString();
 
-        String response = indexHTML.replace("GUID", uuid);
-        response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
+            // Store the GUID
+            commands.lpush(uuid, "exists");
+            commands.expire(uuid, 1800);
 
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-        exchange.getResponseSender().send(response.toString());
+            String response = indexHTML.replace("GUID", uuid);
+            response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
 
-        conn.close();
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
+            exchange.getResponseSender().send(response.toString());
+        } finally {
+            conn.close();
+        }
     }
 }
