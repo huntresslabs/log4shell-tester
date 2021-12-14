@@ -35,6 +35,7 @@ public class IndexHandler implements HttpHandler {
 
             // Store the GUID
             commands.lpush(uuid, "exists");
+            commands.expire(uuid, 1800);
 
             String response = indexHTML.replace("GUID", uuid);
             response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");

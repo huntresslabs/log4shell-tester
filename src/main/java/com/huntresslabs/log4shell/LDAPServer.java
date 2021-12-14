@@ -89,7 +89,9 @@ public class LDAPServer
 
                         // Store this result
                         commands.lpush(key, value);
-                        commands.expire(key, 1800);
+
+                        // Keys expire after 30 minutes from creation...
+                        // commands.expire(key, 1800);
                     } finally {
                         connection.close();
                     }
