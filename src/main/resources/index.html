@@ -71,7 +71,10 @@
                     Your unique identifier is: <code>GUID</code>. You can use the
                     payload below for testing:
                     <div style="text-align: center">
-                        <pre>PAYLOAD</pre>
+                        <pre id="payload">PAYLOAD</pre>
+                        <button class="btn btn-primary" onclick="copyText();">Copy Code</button>
+                        <!-- Styles added to prevent button are content below from shifting layout in undesired ways -->
+                        <span id="copy-confirmed" style="min-width: 60px; display: inline-block; margin-left: 8px;"></span>
                     </div>
                 </p>
 
@@ -95,5 +98,27 @@
                 <span class="text-muted">Created by <a href="https://twitter.com/calebjstewart">@calebjstewart</a>, <a href="https://www.linkedin.com/in/jslagle/">Jason Slagle</a> and <a href="https://twitter.com/_JohnHammond">@_JohnHammond</a>.</span>
             </div>
         </footer>
+
+        <script>
+          function copyText() {
+            /* Get the code text */
+            var copyText = document.getElementById("payload").textContent;
+             /* Copy the text inside the text field */
+            navigator.clipboard.writeText(copyText);
+            /* Calls the function immediately below */
+            confirmCopied();
+          }
+
+          function confirmCopied(){
+            /* Get the notification element */
+            var notification = document.getElementById("copy-confirmed");
+            /* Let the user know the text has been successfully copied */
+            notification.innerHTML = "Copied!";
+            /* Clear the notification */
+            setTimeout(function(){
+              notification.innerHTML = "";
+            }, 3000);
+          }
+        </script>
     </body>
 </html>
