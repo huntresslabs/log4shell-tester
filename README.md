@@ -141,3 +141,16 @@ redis_url: redis://localhost:6379
 hostname: 127.0.0.1
 ```
 
+## Quick and easy local testing, no Redis database instance or docker needed
+
+    mvn clean package
+    java -jar ./target/log4shell-jar-with-dependencies.jar --useEmbeddedRedis
+
+Note you need at least 1GB of free hard drive space for Redis cache.
+
+Then visit <http://127.0.0.1:8000> to see the web interface.
+
+Note -- this LDAP server is running locally, so you would have to port forward the LDAP server to let external apps 
+contact your locally hosted LDAP server,  so the URL in the payload would need to be different.
+
+This should always work if testing other apps locally on your computer.
