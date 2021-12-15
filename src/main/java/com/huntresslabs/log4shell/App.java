@@ -5,15 +5,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.jboss.logging.Logger;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 
-import io.lettuce.core.RedisClient;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -45,9 +47,6 @@ public class App implements Callable<Integer>
 
     @Option(names={"--http-host"}, defaultValue="127.0.0.1", description="IP address on which to listen for HTTP connections (default: 127.0.0.1)")
     private String http_host;
-
-    @Option(names={"--redis-url"}, defaultValue="redis://localhost:6379", description="Connection string for the Redis cache server (default: redis://localhost:6379)")
-    private String redis_url;
 
     @Option(names={"-c", "--config"}, description="Path to YAML configuration file (overrides commandline options).")
     private File config_file;
@@ -107,13 +106,6 @@ public class App implements Callable<Integer>
         }
 
         try {
-            this.redis_url = (String)config.getOrDefault("redis_url", this.redis_url);
-        } catch ( ClassCastException e ) {
-            logger.error("redis_url: must be a string");
-            System.exit(1);
-        }
-
-        try {
             this.hostname  = (String)config.getOrDefault("hostname", this.hostname);
         } catch ( ClassCastException e ) {
             logger.error("hostname: must be a string");
@@ -123,7 +115,6 @@ public class App implements Callable<Integer>
 
     @Override
     public Integer call() throws Exception {
-
         // Parse the configuration file
         if( config_file != null ) {
             logger.info("parsing configuration file");
@@ -133,17 +124,17 @@ public class App implements Callable<Integer>
         // Construct the LDAP url
         String ldap_url = "ldap://" + hostname + ":" + ldap_port;
 
-        // Create the redis connection manager
-        logger.info("connecting to redis database");
-        RedisClient redis = RedisClient.create(redis_url);
+        Cache<String, List<String>> data = Caffeine.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES) // Expire 30 mins after creation
+                .build();
 
         // Run the HTTP server
         logger.infof("starting http server listening on %s:%d", http_host, http_port);
-        HTTPServer.run(http_host, http_port, redis, ldap_url);
+        HTTPServer.run(http_host, http_port, data, ldap_url);
 
         // Run the LDAP server
         logger.infof("starting ldap server listening on %s:%d", ldap_host, ldap_port);
-        LDAPServer.run(ldap_host, ldap_port, redis);
+        LDAPServer.run(ldap_host, ldap_port, data);
 
         return 0;
     }

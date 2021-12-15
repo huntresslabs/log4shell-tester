@@ -52,13 +52,6 @@ mvn clean package
 You will then have a file named `target/log4shell-jar-with-dependencies.jar`
 which contains all required dependencies as well as the testing application.
 
-## Runtime Requirements
-
-The application is self-contained in the generated JAR file, however it does
-require a Redis cache server at runtime. The URL for the redis cache is
-specified through command line arguments. The cache server will hold valid
-UUIDs for users as well as track known "hits" for the LDAP endpoint.
-
 ## Running
 
 The JAR file can be executed directly. Configuration can be passed via command
