@@ -32,14 +32,14 @@ run out of the same process. After receiving a connection from a vulnerable clie
 it will immediately respond with an LDAP Operation Error. **No code is sent from
 our LDAP server to your client**. You can see this interaction in `LDAPServer.java`.
 After sending the error, the LDAP server will simply log the UTC timestamp and the
-remote IP address in the Redis cache for you to lookup later.
+remote IP address in the cache for you to lookup later.
 
 If any of your clients do reach out, you can view the timestamps and external IP
 addresses at your specific "view" URL (presented through a button on the index
 page).
 
 All entries in the cache have a 30 minute time-out. This means that 30 minutes after
-your last request, all results will be gone from the Redis cache forever.
+your last request, all results will be gone from the cache forever.
 
 ## Building
 
@@ -51,13 +51,6 @@ mvn clean package
 
 You will then have a file named `target/log4shell-jar-with-dependencies.jar`
 which contains all required dependencies as well as the testing application.
-
-## Runtime Requirements
-
-The application is self-contained in the generated JAR file, however it does
-require a Redis cache server at runtime. The URL for the redis cache is
-specified through command line arguments. The cache server will hold valid
-UUIDs for users as well as track known "hits" for the LDAP endpoint.
 
 ## Running
 
@@ -73,7 +66,6 @@ $ java -jar target/log4shell-jar-with-dependencies.jar --help
 Usage: log4shell-tester [-hV] [-c=<config_file>] [--hostname=<hostname>]
                         [--http-host=<http_host>] [--http-port=<http_port>]
                         [--ldap-host=<ldap_host>] [--ldap-port=<ldap_port>]
-                        [--redis-url=<redis_url>]
 Execute the Huntress Log4Shell-Tester HTTP and LDAP servers.
   -c, --config=<config_file>
                   Path to YAML configuration file (overrides commandline
@@ -92,9 +84,6 @@ Execute the Huntress Log4Shell-Tester HTTP and LDAP servers.
                     0.0.0.0)
       --ldap-port=<ldap_port>
                   Port to listen for LDAP connections (default: 1389)
-      --redis-url=<redis_url>
-                  Connection string for the Redis cache server (default: redis:
-                    //localhost:6379)
   -V, --version   Print version information and exit.
   
 # Example invocation listening on 127.0.0.1 for HTTP (default).
@@ -106,7 +95,6 @@ $ java -jar target/log4shell-jar-with-dependencies.jar \
    --http-port 8000 \
    --ldap-host 0.0.0.0 \
    --ldap-port 1389 \
-   --redis-url "redis://my-redis-url.something.com:6379"
    
 # Example invocation allowing HTTP inbound externally
 $ java -jar target/log4shell-jar-with-dependencies.jar \
@@ -115,10 +103,8 @@ $ java -jar target/log4shell-jar-with-dependencies.jar \
    --http-port 8000 \
    --ldap-host 0.0.0.0 \
    --ldap-port 1389 \
-   --redis-url "redis://:password@my-redis-url.something.com:6379"
    
-# Example invocation with a configuration file (recommended to better store
-#   redis secrets).
+# Example invocation with a configuration file .
 $ java -jar target/log4shell-jar-with-dependencies.jar \
    --config /path/to/log4shell/config.yaml
 ```
@@ -137,7 +123,6 @@ http_host: 127.0.0.1
 http_port: 8000
 ldap_host: 0.0.0.0
 ldap_port: 1389
-redis_url: redis://localhost:6379
 hostname: 127.0.0.1
 ```
 

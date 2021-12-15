@@ -43,9 +43,9 @@
             <version>${undertow.version}</version>
     </dependency>
     <dependency>
-        <groupId>io.lettuce</groupId>
-        <artifactId>lettuce-core</artifactId>
-        <version>6.1.5.RELEASE</version>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.0.5</version>
     </dependency>
     <dependency>
       <groupId>info.picocli</groupId>
