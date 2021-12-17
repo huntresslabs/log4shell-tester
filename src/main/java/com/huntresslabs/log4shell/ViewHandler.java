@@ -70,7 +70,7 @@ public class ViewHandler implements HttpHandler {
                     Map<String, Object> entry = new HashMap<String, Object>();
                     entry.put("ip", values[0]);
                     entry.put("timestamp", values[1]);
-                    entry.put("keys", new String[] {});
+                    entry.put("keys", "[]");
 
                     entries.add(entry);
                 }
