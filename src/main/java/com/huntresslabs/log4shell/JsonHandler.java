@@ -1,5 +1,6 @@
 package com.huntresslabs.log4shell;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,6 +16,8 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 public class JsonHandler implements HttpHandler {
 
@@ -41,20 +44,28 @@ public class JsonHandler implements HttpHandler {
             }
 
             Gson gson = new Gson();
-            Collection<Map<String,String>> entries = new ArrayList<Map<String, String>>();
+            Collection<Map<String,Object>> entries = new ArrayList<Map<String, Object>>();
             List<String> hits = commands.lrange(uuid, 0, commands.llen(uuid));
 
             for(String hit : hits) {
                 if( hit == "exists" ) continue;
 
-                // Parse out datetime and IP
-                String[] values = hit.split("/");
-                if( values.length != 2 ) continue;
+                Map<String, Object> entry;
 
-                // Append to results
-                Map<String, String> entry = new HashMap<String, String>();
-                entry.put("ip", values[0]);
-                entry.put("timestamp", values[1]);
+                try {
+                    Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+                    entry = gson.fromJson(hit, mapType);
+                } catch ( JsonParseException e ) {
+                    // Parse out datetime and IP
+                    String[] values = hit.split("/");
+                    if( values.length != 2 ) continue;
+
+                    // Append to results
+                    entry = new HashMap<String, Object>();
+                    entry.put("ip", values[0]);
+                    entry.put("timestamp", values[1]);
+                    entry.put("keys", new String[] {});
+                }
 
                 entries.add(entry);
             }

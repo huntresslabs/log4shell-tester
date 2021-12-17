@@ -1,5 +1,7 @@
 package com.huntresslabs.log4shell;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import io.lettuce.core.RedisClient;
@@ -37,11 +39,12 @@ public class IndexHandler implements HttpHandler {
             commands.lpush(uuid, "exists");
             commands.expire(uuid, 1800);
 
-            String response = indexHTML.replace("GUID", uuid);
-            response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
+            Map<String, Object> context = new HashMap<String, Object>();
+            context.put("uuid", uuid);
+            context.put("ldap_url", this.url);
 
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-            exchange.getResponseSender().send(response.toString());
+            exchange.getResponseSender().send(HTTPServer.jinjava.render(this.indexHTML, context));
         } finally {
             conn.close();
         }

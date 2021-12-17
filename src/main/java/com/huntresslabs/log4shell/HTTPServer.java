@@ -1,5 +1,7 @@
 package com.huntresslabs.log4shell;
 
+import com.hubspot.jinjava.Jinjava;
+
 import io.lettuce.core.RedisClient;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -11,6 +13,8 @@ import io.undertow.server.handlers.accesslog.JBossLoggingAccessLogReceiver;
 
 public class HTTPServer
 {
+    public static final Jinjava jinjava = new Jinjava();
+
     public static void run(String host, int port, RedisClient redis, String ldap_url) {
         // Setup our routes
         HttpHandler routes = new RoutingHandler()

@@ -1,7 +1,16 @@
 package com.huntresslabs.log4shell;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
+import com.google.gson.reflect.TypeToken;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
@@ -39,28 +48,42 @@ public class ViewHandler implements HttpHandler {
             }
 
             // Build the page :sob:
-            StringBuilder body = new StringBuilder();
+            Gson gson = new Gson();
+            Map<String, Object> context = new HashMap<String, Object>();
+            Collection<Map<String, Object>> entries = new ArrayList<Map<String, Object>>();
 
             // Iterate over all hits
             List<String> hits = commands.lrange(uuid, 0, commands.llen(uuid));
             for(String hit : hits) {
                 if( hit == "exists" ) continue;
 
-                // Parse out datetime and IP
-                String[] values = hit.split("/");
-                if( values.length != 2 ) continue;
+                try {
+                    Type mapType = new TypeToken<Map<String, Object>>() {}.getType();
+                    Map<String, Object> entry = gson.fromJson(hit, mapType);
+                    entries.add(entry);
+                } catch ( JsonParseException e ) {
+                    // Parse out datetime and IP
+                    String[] values = hit.split("/");
+                    if( values.length != 2 ) continue;
 
-                // Append to results
-                body.append("<tr><td>" + values[0] + "</td><td>" + values[1] + "</td></tr>");
+                    // Append to results
+                    Map<String, Object> entry = new HashMap<String, Object>();
+                    entry.put("ip", values[0]);
+                    entry.put("timestamp", values[1]);
+                    entry.put("keys", new String[] {});
+
+                    entries.add(entry);
+                }
             }
 
-            String response = viewHTML.replace("BODY", body.toString());
-            response = response.replace("UUID", uuid);
-            response = response.replace("PAYLOAD", "${jndi:"+this.url+"/"+uuid+"}");
+            context.put("entries", entries);
+            context.put("uuid", uuid);
+            context.put("payload", "${jndi:"+this.url+"/"+uuid+"}");
+            context.put("ldap_url", this.url);
 
             // Send the response w/ HTML type
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/html");
-            exchange.getResponseSender().send(response);
+            exchange.getResponseSender().send(HTTPServer.jinjava.render(viewHTML, context));
 
         } finally {
             connection.close();
