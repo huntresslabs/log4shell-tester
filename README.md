@@ -46,7 +46,10 @@ your last request, all results will be gone from the Redis cache forever.
 You can build a JAR file with the following command:
 
 ```sh
-mvn clean package
+mvn clean package 
+
+# via maven wrapper
+./mvnw clean package
 ```
 
 You will then have a file named `target/log4shell-jar-with-dependencies.jar`
