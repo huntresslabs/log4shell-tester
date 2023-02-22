@@ -5,7 +5,7 @@ COPY . /log4shell
 WORKDIR /log4shell
 RUN mvn clean package
 
-FROM openjdk:18-alpine
+FROM openjdk:20-slim
 
 # Final image only contains the JAR file
 COPY --from=build /log4shell/target/log4shell-jar-with-dependencies.jar /log4shell.jar
